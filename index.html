@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Count</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for animations and overall look */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Animation for the counters */
+        .counter-value {
+            display: inline-block;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        .value-pop {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+
+    <div class="w-full max-w-4xl mx-auto">
+        <!-- Main Title -->
+        <h1 class="text-4xl sm:text-5xl font-bold text-center mb-8 text-cyan-400">
+            Word Count
+        </h1>
+        <p class="text-center text-gray-400 mb-12 max-w-2xl mx-auto">
+            Paste your text below and watch the stats update instantly. No buttons, no hassle.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Text Input Area -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl shadow-cyan-500/10">
+                <textarea 
+                    id="text-input" 
+                    class="w-full h-80 bg-gray-900 text-gray-300 p-4 rounded-lg border-2 border-gray-700 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition duration-300 resize-none placeholder-gray-500"
+                    placeholder="Start typing or paste your text here..."
+                ></textarea>
+            </div>
+
+            <!-- Statistics Display -->
+            <div class="flex flex-col justify-center space-y-6">
+                <!-- Letters -->
+                <div id="letters-stat" class="bg-gray-800 p-6 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold text-gray-300">Letters</h2>
+                        <span id="letter-count" class="counter-value text-4xl font-bold text-cyan-400">0</span>
+                    </div>
+                </div>
+                <!-- Words -->
+                <div id="words-stat" class="bg-gray-800 p-6 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold text-gray-300">Words</h2>
+                        <span id="word-count" class="counter-value text-4xl font-bold text-green-400">0</span>
+                    </div>
+                </div>
+                <!-- Sentences -->
+                <div id="sentences-stat" class="bg-gray-800 p-6 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold text-gray-300">Sentences</h2>
+                        <span id="sentence-count" class="counter-value text-4xl font-bold text-purple-400">0</span>
+                    </div>
+                </div>
+                <!-- Paragraphs -->
+                <div id="paragraphs-stat" class="bg-gray-800 p-6 rounded-2xl shadow-lg transform transition-transform duration-300 hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold text-gray-300">Paragraphs</h2>
+                        <span id="paragraph-count" class="counter-value text-4xl font-bold text-red-400">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element Selection ---
+        const textInput = document.getElementById('text-input');
+        const letterCountEl = document.getElementById('letter-count');
+        const wordCountEl = document.getElementById('word-count');
+        const sentenceCountEl = document.getElementById('sentence-count');
+        const paragraphCountEl = document.getElementById('paragraph-count');
+
+        /**
+         * Animates a counter element when its value changes.
+         * @param {HTMLElement} element The counter element to animate.
+         */
+        function animateCounter(element) {
+            element.classList.add('value-pop');
+            setTimeout(() => {
+                element.classList.remove('value-pop');
+            }, 300); // Duration should match the CSS transition
+        }
+        
+        /**
+         * Updates the text content of an element and triggers an animation.
+         * @param {HTMLElement} element - The DOM element to update.
+         * @param {number | string} value - The new value to display.
+         */
+        function updateCounter(element, value) {
+            if (element.textContent !== String(value)) {
+                element.textContent = value;
+                animateCounter(element);
+            }
+        }
+
+        /**
+         * Analyzes the input text and updates all statistical counters.
+         */
+        function analyzeText() {
+            const text = textInput.value;
+
+            // 1. Letter Count: Simple length of the string.
+            const letterCount = text.length;
+            updateCounter(letterCountEl, letterCount);
+
+            // 2. Word Count: Split by whitespace.
+            // \s+ matches one or more whitespace characters.
+            // .trim() removes leading/trailing whitespace to prevent counting empty strings.
+            const words = text.trim() === '' ? [] : text.trim().split(/\s+/);
+            const wordCount = words.length;
+            updateCounter(wordCountEl, wordCount);
+
+            // 3. Sentence Count: Split by sentence-ending punctuation.
+            // This regex looks for '.', '!', or '?' possibly followed by whitespace.
+            // We filter out any empty strings that might result.
+            const sentences = text.trim() === '' ? [] : text.trim().split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+            const sentenceCount = sentences.length;
+            updateCounter(sentenceCountEl, sentenceCount);
+
+            // 4. Paragraph Count: Split by one or more newline characters.
+            // We filter out empty paragraphs (e.g., multiple blank lines).
+            const paragraphs = text.trim() === '' ? [] : text.trim().split(/\n+/).filter(p => p.trim().length > 0);
+            const paragraphCount = paragraphs.length;
+            updateCounter(paragraphCountEl, paragraphCount);
+        }
+
+        // --- Event Listener ---
+        // The 'input' event fires immediately whenever the content of the textarea changes.
+        textInput.addEventListener('input', analyzeText);
+        
+        // Initial analysis for any pre-filled text (e.g., from browser cache).
+        window.onload = analyzeText;
+    </script>
+
+</body>
+</html>
